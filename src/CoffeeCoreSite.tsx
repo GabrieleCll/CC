@@ -153,8 +153,8 @@ export default function CoffeeCoreSite() {
   const products = useMemo<Product[]>(
     () => [
       {
-        id: "polifenoli",
-        name: "Polifenoli & Bioattivi (upcycled)",
+        id: "antiossidanti",
+        name: "Antiossidanti & Bioattivi (upcycled)",
         status: "presente",
         summary:
           "Estratti ad alto valore da scarti di caffè per nutraceutica, food & beverage e cosmetica.",
@@ -259,15 +259,15 @@ export default function CoffeeCoreSite() {
       </header>
 
       {/* HERO */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10" aria-hidden>
+      <section id="hero" className="relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10 z-0 pointer-events-none" aria-hidden>
           <svg className="w-[140%] h-[140%] -translate-x-12 -translate-y-8" viewBox="0 0 800 600" fill="none">
             <circle cx="150" cy="150" r="120" fill={palette.leafGreen} />
             <circle cx="350" cy="220" r="180" fill={palette.teal} />
             <circle cx="700" cy="100" r="110" fill={palette.straw} />
           </svg>
         </div>
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28 z-10">
           <div className="grid md:grid-cols-2 items-center gap-10">
             <div>
               <h1 className="text-4xl sm:text-6xl font-bold leading-tight text-[#455D51]">
@@ -275,7 +275,7 @@ export default function CoffeeCoreSite() {
               </h1>
               <p className="mt-6 text-lg text-[#5F464B] max-w-prose">
                 Coffee Core è una <strong>green company</strong> che trasforma gli scarti di caffè in ingredienti funzionali:
-                <em> polifenoli, bioattivi e oli</em>. L'upcycling è il nostro core business: dal rifiuto, valore reale.
+                <em> antiossidanti, bioattivi e oli</em>. L'upcycling è il nostro core business: dal rifiuto, valore reale.
               </p>
               <div className="mt-8 flex gap-4">
                 <a href="#prodotti" className="px-5 py-3 rounded-2xl bg-[#57992D] text-white font-medium shadow hover:translate-y-0.5 transition">
@@ -306,7 +306,7 @@ export default function CoffeeCoreSite() {
             <h2 className="text-3xl font-bold text-[#455D51]">Missione</h2>
             <p className="mt-4 text-[#5F464B] leading-7">
               Ridurre gli sprechi alimentari valorizzando i sottoprodotti del caffè. Con tecnologie
-              di estrazione mirate, isoliamo <strong>polifenoli</strong> e composti <strong>bioattivi</strong> per
+              di estrazione mirate, isoliamo <strong>antiossidanti</strong> e composti <strong>bioattivi</strong> per
               applicazioni che spaziano dal food alla cosmetica, in un'ottica di <em>economia circolare</em>.
             </p>
           </div>
@@ -330,17 +330,17 @@ export default function CoffeeCoreSite() {
               {
                 title: "Raccolta",
                 text: "Scarti da torrefazioni e bar, con logistica tracciata.",
-                color: palette.straw,
+                color: palette.straw, opacity: 1
               },
               {
                 title: "Pre-trattamento",
                 text: "Essiccazione e selezione per massima resa.",
-                color: palette.terracotta,
+                color: palette.leafGreen, opacity: 0.75
               },
-              { title: "Estrazione", text: "Processi a basso impatto.", color: palette.leafGreen },
-              { title: "Formulazione", text: "Ingredienti per diversi settori.", color: palette.teal },
+              { title: "Estrazione", text: "Processi a basso impatto.", color: palette.leafGreen, opacity: 1 },
+              { title: "Formulazione", text: "Ingredienti per diversi settori.", color: palette.forest, opacity: 1 },
             ].map((s, i) => (
-              <div key={i} className="rounded-2xl p-5 shadow border border-black/5" style={{ background: s.color }}>
+              <div key={i} className="rounded-2xl p-5 shadow border border-black/5" style={{ background: s.color, opacity: s.opacity }}>
                 <p className="text-lg font-semibold text-white drop-shadow-sm">{s.title}</p>
                 <p className="mt-2 text-white/90 text-sm leading-6">{s.text}</p>
               </div>
@@ -408,22 +408,32 @@ export default function CoffeeCoreSite() {
               onSubmit={(e) => {
                 e.preventDefault();
                 const fd = new FormData(e.currentTarget as HTMLFormElement);
-                const name = String(fd.get("name") || "");
-                const email = String(fd.get("email") || "");
-                const msg = String(fd.get("message") || "");
+                const payload = Object.fromEntries(fd.entries());
+                // tentativo invio opzionale a un endpoint
                 fetch("/api/notify", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ product: "contact", email, name, msg, ts: new Date().toISOString() }),
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ product: "contact", ...payload, ts: new Date().toISOString() }),
                 }).catch(() => {});
                 (e.currentTarget as HTMLFormElement).reset();
                 alert("Grazie! Ti ricontatteremo al più presto.");
               }}
               className="mt-6 grid sm:grid-cols-2 gap-4"
             >
-              <input name="name" required placeholder="Nome" className="px-4 py-3 rounded-xl bg-white border border-black/10" />
-              <input name="email" required type="email" placeholder="Email" className="px-4 py-3 rounded-xl bg-white border border-black/10" />
+              <input name="name" required placeholder="Nome e Cognome*" className="px-4 py-3 rounded-xl bg-white border border-black/10" />
+              <input name="email" required type="email" placeholder="Email*" className="px-4 py-3 rounded-xl bg-white border border-black/10" />
+              <input name="phone" placeholder="Telefono" className="px-4 py-3 rounded-xl bg-white border border-black/10" />
+              <input name="company" placeholder="Azienda" className="px-4 py-3 rounded-xl bg-white border border-black/10" />
               <textarea name="message" required placeholder="Messaggio" rows={5} className="sm:col-span-2 px-4 py-3 rounded-xl bg-white border border-black/10" />
+
+              {/* Flag privacy prima del pulsante invia */}
+              <label className="sm:col-span-2 flex items-start gap-3 text-sm text-[#5F464B]">
+              <input type="checkbox" name="privacyAccepted" required className="h-4 w-4" />
+                <span>
+                  Dichiaro di aver letto l' <a href="/privacy" className="underline" target="_blank" rel="noopener noreferrer">informativa privacy</a> e acconsento al trattamento dei dati per evadere la richiesta.
+                </span>
+              </label>
+
               <button className="sm:col-span-2 justify-self-start px-5 py-3 rounded-2xl bg-[#57992D] text-white font-medium shadow hover:translate-y-0.5 transition">
                 Invia
               </button>
@@ -432,7 +442,12 @@ export default function CoffeeCoreSite() {
           <aside className="rounded-2xl p-6 bg-white border border-black/5 shadow">
             <p className="font-semibold text-[#684330]">Dati aziendali</p>
             <ul className="mt-3 text-sm text-[#5F464B] space-y-1">
-              <li><strong>Coffee Core s.r.l. SB</strong></li>
+              <li>
+               <div className="display: flex">
+                <img src="/logo_brown.svg" alt="Coffee Core" className="h-4 w-4 mr-1" /> 
+                <strong>Coffee Core s.r.l. SB</strong>
+              </div> 
+              </li>
               <li>P.IVA: 02792950699</li>
               <li>Email: info@coffeecore.it</li>
               <li>Sede: Via Primo Mazzolari SNC, 66100 Chieti (presso il Parco Scientifico e Tecnologico d'Abruzzo)</li>
@@ -466,7 +481,7 @@ export default function CoffeeCoreSite() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h3 className="text-2xl font-bold text-[#455D51]">{clickedProduct.name}</h3>
-                <p className="text-sm text-[#5F464B] mt-1">Funzionalità in arrivo: grazie per l'interesse!</p>
+                <p className="text-sm text-[#5F464B] mt-1">Prodotto in arrivo: grazie per l'interesse!</p>
               </div>
               <button onClick={() => setOpen(false)} className="p-2 rounded-xl bg-black/5 hover:bg-black/10">✕</button>
             </div>
