@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Package, Cog, FlaskConical, BottleWine } from "lucide-react";
 
 function PrivacyPage() {
 return (
@@ -323,31 +324,32 @@ export default function CoffeeCoreSite() {
 
       {/* PROCESS */}
       <section id="process" className="scroll-mt-20 bg-white/70 border-y border-black/5">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
-          <h2 className="text-3xl font-bold text-[#455D51]">Dal fondo al valore</h2>
-          <div className="mt-8 grid md:grid-cols-4 gap-6">
-            {[
-              {
-                title: "Raccolta",
-                text: "Scarti da torrefazioni e bar, con logistica tracciata.",
-                color: palette.straw, opacity: 1
-              },
-              {
-                title: "Pre-trattamento",
-                text: "Essiccazione e selezione per massima resa.",
-                color: palette.leafGreen, opacity: 0.75
-              },
-              { title: "Estrazione", text: "Processi a basso impatto.", color: palette.leafGreen, opacity: 1 },
-              { title: "Formulazione", text: "Ingredienti per diversi settori.", color: palette.forest, opacity: 1 },
-            ].map((s, i) => (
-              <div key={i} className="rounded-2xl p-5 shadow border border-black/5" style={{ background: s.color, opacity: s.opacity }}>
-                <p className="text-lg font-semibold text-white drop-shadow-sm">{s.title}</p>
-                <p className="mt-2 text-white/90 text-sm leading-6">{s.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
+<h2 className="text-3xl font-bold text-[#455D51]">Dal fondo al valore</h2>
+<div className="mt-8 grid md:grid-cols-4 gap-6">
+<div className="rounded-2xl p-5 shadow border border-black/5 bg-[#D8C27A] flex flex-col items-start">
+<Package className="h-8 w-8 text-white mb-2" />
+<p className="text-lg font-semibold text-white drop-shadow-sm">Raccolta</p>
+<p className="mt-2 text-white/90 text-sm leading-6">Scarti da torrefazioni e bar, con logistica tracciata.</p>
+</div>
+<div className="rounded-2xl p-5 shadow border border-black/5 bg-[#57992D] opacity-75 flex flex-col items-start">
+<Cog className="h-8 w-8 text-white mb-2" />
+<p className="text-lg font-semibold text-white drop-shadow-sm">Pre-trattamento</p>
+<p className="mt-2 text-white/90 text-sm leading-6">Essiccazione e selezione per massima resa.</p>
+</div>
+<div className="rounded-2xl p-5 shadow border border-black/5 bg-[#57992D] flex flex-col items-start">
+<FlaskConical className="h-8 w-8 text-white mb-2" />
+<p className="text-lg font-semibold text-white drop-shadow-sm">Estrazione</p>
+<p className="mt-2 text-white/90 text-sm leading-6">Processi a basso impatto.</p>
+</div>
+<div className="rounded-2xl p-5 shadow border border-black/5 bg-[#455D51] flex flex-col items-start">
+<BottleWine className="h-8 w-8 text-white mb-2" />
+<p className="text-lg font-semibold text-white drop-shadow-sm">Formulazione</p>
+<p className="mt-2 text-white/90 text-sm leading-6">Ingredienti per diversi settori.</p>
+</div>
+</div>
+</div>
+</section>
 
       {/* PRODUCTS */}
       <section id="prodotti" className="scroll-mt-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
@@ -383,19 +385,42 @@ export default function CoffeeCoreSite() {
       </section>
 
       {/* CALL TO ACTION */}
-      <section id="cta" className="bg-[#455D51]">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 grid md:grid-cols-2 gap-8 items-center">
-          <div>
-            <h3 className="text-2xl font-bold text-white">Vuoi diventare partner di filiera?</h3>
-            <p className="mt-2 text-white/80">
-              Cerchiamo torrefazioni, bar e marchi che vogliono trasformare uno scarto in opportunità.
-            </p>
-          </div>
-          <button onClick={() => jumpAndHighlight('contatti')} className="justify-self-start md:justify-self-end px-5 py-3 rounded-2xl bg-white text-[#455D51] font-medium shadow hover:translate-y-0.5 transition">
-            Scrivici
-            </button>
+      <section id="cta" className="scroll-mt-20">
+  <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+    <div className="rounded-3xl overflow-hidden bg-[#455D51]">
+      <div className="grid md:grid-cols-2">
+        {/* Colonna IMMAGINE: occupa tutta la metà sinistra */}
+        <div className="relative min-h-[440px] md:min-h-[640px]">
+          <img
+            src="/partner.jpg"               // metti qui il tuo file (in /public)
+            alt="Partner di filiera"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
         </div>
-      </section>
+
+        {/* Colonna TESTO: spaziosa */}
+        <div className="p-10 md:p-16 text-white flex flex-col justify-center">
+          <h3 className="text-3xl md:text-4xl font-bold">
+            Vuoi diventare partner di filiera?
+          </h3>
+          <p className="mt-4 text-white/85 text-lg leading-relaxed max-w-prose">
+            Cerchiamo torrefazioni, bar e brand che vogliono trasformare uno scarto in
+            opportunità concreta. Unisciti alla nostra rete e sviluppiamo insieme
+            prodotti upcycled ad alto valore aggiunto.
+          </p>
+          <div className="mt-8">
+            <button
+              onClick={() => jumpAndHighlight('contatti')}
+              className="px-5 py-3 rounded-2xl bg-white text-[#455D51] font-medium shadow hover:translate-y-0.5 transition"
+            >
+              Scrivici
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* CONTACTS */}
       <section id="contatti" className="scroll-mt-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
@@ -514,7 +539,7 @@ export default function CoffeeCoreSite() {
                     // show mailto fallback
                     const subject = encodeURIComponent(`Interesse: ${clickedProduct.name}`);
                     const body = encodeURIComponent("Vorrei saperne di più su questo prodotto quando sarà pronto.");
-                    window.location.href = `mailto:admin@coffeecore.example?subject=${subject}&body=${body}`;
+                    window.location.href = `mailto:info@coffeecore.it?subject=${subject}&body=${body}`;
                   } finally {
                     setSubmitting(false);
                   }
