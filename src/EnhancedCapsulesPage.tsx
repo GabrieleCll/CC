@@ -103,7 +103,7 @@ export default function EnhancedCapsulesPage() {
 
               <p className="text-xs text-[#5F464B]">
                 *Nessuna indicazione di beneficio per la salute. Compatibilità con sistemi Nespresso® non affiliata al marchio. 
-                Info su ingredienti e allergeni nell’etichetta. Pre-autorizzazione Stripe rimborsabile (se attivata).
+                Info su ingredienti e allergeni nell’etichetta.
               </p>
             </form>
           </div>
