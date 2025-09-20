@@ -118,7 +118,6 @@ export default function CoffeeCoreSite() {
         body: JSON.stringify({
           product: p.id,
           email: "gabrieleciullo95@gmail.com",
-          ts: new Date().toISOString(),
         }),
       });
       if (res.ok) {
@@ -341,7 +340,7 @@ export default function CoffeeCoreSite() {
                 fetch("https://cc-web-service-9c1f.onrender.com/api/notify", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ product: "contact", ...payload, ts: new Date().toISOString() }),
+                body: JSON.stringify({ product: "contact", ...payload }),
                 }).catch(() => {});
                 (e.currentTarget as HTMLFormElement).reset();
                 alert("Grazie! Ti ricontatteremo al più presto.");
@@ -352,7 +351,7 @@ export default function CoffeeCoreSite() {
               <input name="email" required type="email" placeholder="Email*" className="px-4 py-3 rounded-xl bg-white border border-black/10" />
               <input name="phone" placeholder="Telefono" className="px-4 py-3 rounded-xl bg-white border border-black/10" />
               <input name="company" placeholder="Azienda" className="px-4 py-3 rounded-xl bg-white border border-black/10" />
-              <textarea name="message" required placeholder="Messaggio" rows={5} className="sm:col-span-2 px-4 py-3 rounded-xl bg-white border border-black/10" />
+              <textarea name="message" required placeholder="Messaggio*" rows={5} className="sm:col-span-2 px-4 py-3 rounded-xl bg-white border border-black/10" />
 
               {/* Flag privacy prima del pulsante invia */}
               <label className="sm:col-span-2 flex items-start gap-3 text-sm text-[#5F464B]">
@@ -429,7 +428,7 @@ export default function CoffeeCoreSite() {
                     const res = await fetch("https://cc-web-service-9c1f.onrender.com/api/notify", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ product: clickedProduct.id, email, ts: new Date().toISOString() }),
+                      body: JSON.stringify({ product: clickedProduct.id, email}),
                     });
                     if (res.ok) {
                       setSubmitMsg("Perfetto! Ti avviseremo appena disponibile.");
