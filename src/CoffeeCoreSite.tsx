@@ -112,18 +112,18 @@ export default function CoffeeCoreSite() {
     setSubmitMsg(null);
 
     try {
-      const res = await fetch("/api/notify", {
+      const res = await fetch("https://cc-web-service-9c1f.onrender.com/api/notify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           product: p.id,
-          email: "info@coffeecore.it",
+          email: "gabrieleciullo95@gmail.com",
           ts: new Date().toISOString(),
         }),
       });
       if (res.ok) {
         setSubmitMsg(
-          "Grazie! Abbiamo registrato il tuo interesse e avvisato l'amministratore."
+          "Grazie, abbiamo registrato il tuo interesse! Non appena il prodotto sarà disponibile ti ricontatteremo."
         );
       } else {
         setSubmitMsg(null);
@@ -338,7 +338,7 @@ export default function CoffeeCoreSite() {
                 const fd = new FormData(e.currentTarget as HTMLFormElement);
                 const payload = Object.fromEntries(fd.entries());
                 // tentativo invio opzionale a un endpoint
-                fetch("/api/notify", {
+                fetch("https://cc-web-service-9c1f.onrender.com/api/notify", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ product: "contact", ...payload, ts: new Date().toISOString() }),
@@ -377,7 +377,7 @@ export default function CoffeeCoreSite() {
               </div> 
               </li>
               <li>P.IVA: 02792950699</li>
-              <li>Email: info@coffeecore.it</li>
+              <li>Email: gabrieleciullo95@gmail.com</li>
               <li>Sede: Via Primo Mazzolari SNC, 66100 Chieti (presso il Parco Scientifico e Tecnologico d'Abruzzo)</li>
             </ul>
           </aside>
@@ -426,7 +426,7 @@ export default function CoffeeCoreSite() {
                   setSubmitting(true);
                   setSubmitMsg(null);
                   try {
-                    const res = await fetch("/api/notify", {
+                    const res = await fetch("https://cc-web-service-9c1f.onrender.com/api/notify", {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ product: clickedProduct.id, email, ts: new Date().toISOString() }),
@@ -442,7 +442,7 @@ export default function CoffeeCoreSite() {
                     // show mailto fallback
                     const subject = encodeURIComponent(`Interesse: ${clickedProduct.name}`);
                     const body = encodeURIComponent("Vorrei saperne di più su questo prodotto quando sarà pronto.");
-                    window.location.href = `mailto:info@coffeecore.it?subject=${subject}&body=${body}`;
+                    window.location.href = `mailto:gabrieleciullo95@gmail.com?subject=${subject}&body=${body}`;
                   } finally {
                     setSubmitting(false);
                   }
