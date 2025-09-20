@@ -18,27 +18,33 @@ app.get("/healthz", (_req, res) => res.status(200).json({ ok: true }));
 
 app.post("/api/notify", async (req, res) => {
   try {
-    const { name, email, phone, company, message, product } = req.body || {};
+    const { name, email, phone, company, message, product, price, cap } = req.body || {};
 
-    // Validazioni basilari
-    if (!email || !message) {
-      return res.status(400).json({ ok: false, error: "email and message are required" });
+    // Regole:
+    // - Contatti: serve email + message
+    // - Pre-ordine (se c'è product): basta email (message opzionale)
+    const isPreorder = Boolean(product);
+    if (!email || (!isPreorder && !message)) {
+      return res.status(400).json({ ok: false, error: "invalid_payload" });
     }
 
-    const subject = product
-      ? `Nuovo contatto (${product}) – Coffee Core`
+    const subject = isPreorder
+      ? `Pre-ordine (${product}${price ? ` €${price}` : ""}) – Coffee Core`
       : `Nuovo contatto – Coffee Core`;
 
-    const text =
-`Nuovo contatto dal sito Coffee Core
+    const msgText =
+`${isPreorder ? "Richiesta pre-ordine" : "Nuovo contatto"} dal sito Coffee Core
 
 Nome: ${name || "-"}
 Email: ${email}
 Telefono: ${phone || "-"}
 Azienda: ${company || "-"}
 Prodotto: ${product || "-"}
+Prezzo selezionato: ${price || "-"}
+CAP: ${cap || "-"}
+
 Messaggio:
-${message}
+${message || "(non inserito)"}
 
 Timestamp: ${new Date().toISOString()}
 `;
@@ -61,3 +67,11 @@ Timestamp: ${new Date().toISOString()}
 // Porta fornita da Render
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Email service listening on :${port}`));
+
+app.options("/api/notify", (req, res) => {
+  res.set("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.set("Access-Control-Allow-Headers", "Content-Type");
+  res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+  return res.status(204).end();
+});
+

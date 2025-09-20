@@ -62,7 +62,7 @@ export default function EnhancedCapsulesPage() {
                 const fd = new FormData(e.currentTarget as HTMLFormElement);
                 const payload = Object.fromEntries(fd.entries());
                 // esempio: invio verso un endpoint backend o a un servizio di logging
-                fetch("/api/preorder", {
+                fetch("https://cc-web-service-9c1f.onrender.com/api/notify", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ product: "enhanced-capsules", ...payload, ts: new Date().toISOString() }),
