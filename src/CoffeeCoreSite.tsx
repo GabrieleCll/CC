@@ -347,7 +347,14 @@ export default function CoffeeCoreSite() {
                 fetch(EMAIL_ENDPOINT, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ product: "contact", ...payload }),
+                body: JSON.stringify({ 
+                  product: "contact",
+                  email: payload.email,
+                  name: payload.name,
+                  phone: payload.phone,
+                  company: payload.company,
+                  message: payload.message 
+                  }),
                 }).catch(() => {});
                 (e.currentTarget as HTMLFormElement).reset();
                 alert("Grazie! Ti ricontatteremo al più presto.");
@@ -435,7 +442,14 @@ export default function CoffeeCoreSite() {
                     const res = await fetch(EMAIL_ENDPOINT, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ product: clickedProduct.id, email}),
+                      body: JSON.stringify({ 
+                        product: clickedProduct.id,
+                        email,
+                        name: "-",
+                        phone: "-",
+                        company: "-",
+                        message: "Vorrei saperne di più su questo prodotto quando sarà pronto."
+                      }),
                     });
                     if (res.ok) {
                       setSubmitMsg("Perfetto! Ti avviseremo appena disponibile.");
