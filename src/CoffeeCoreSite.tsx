@@ -32,6 +32,9 @@ export default function CoffeeCoreSite() {
   const [submitting, setSubmitting] = useState(false);
   const [submitMsg, setSubmitMsg] = useState<string | null>(null);
 
+  // Endpoint email-service su Render (sostituisci con il tuo URL)
+  const EMAIL_ENDPOINT = "https://cc-web-service-9c1f.onrender.com/api/notify";
+
   type Product = {
     id: string;
     name: string;
@@ -112,12 +115,16 @@ export default function CoffeeCoreSite() {
     setSubmitMsg(null);
 
     try {
-      const res = await fetch("https://cc-web-service-9c1f.onrender.com/api/notify", {
+      const res = await fetch(EMAIL_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           product: p.id,
           email: "gabrieleciullo95@gmail.com",
+          name: "-",
+          phone: "-",
+          company: "-",
+          message: "Ho aperto il prodotto"
         }),
       });
       if (res.ok) {
@@ -337,7 +344,7 @@ export default function CoffeeCoreSite() {
                 const fd = new FormData(e.currentTarget as HTMLFormElement);
                 const payload = Object.fromEntries(fd.entries());
                 // tentativo invio opzionale a un endpoint
-                fetch("https://cc-web-service-9c1f.onrender.com/api/notify", {
+                fetch(EMAIL_ENDPOINT, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ product: "contact", ...payload }),
@@ -425,7 +432,7 @@ export default function CoffeeCoreSite() {
                   setSubmitting(true);
                   setSubmitMsg(null);
                   try {
-                    const res = await fetch("https://cc-web-service-9c1f.onrender.com/api/notify", {
+                    const res = await fetch(EMAIL_ENDPOINT, {
                       method: "POST",
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ product: clickedProduct.id, email}),
