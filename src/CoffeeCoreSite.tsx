@@ -127,11 +127,7 @@ export default function CoffeeCoreSite() {
           message: "Ho aperto il prodotto"
         }),
       });
-      if (res.ok) {
-        setSubmitMsg(
-          "Grazie, abbiamo registrato il tuo interesse! Non appena il prodotto sarà disponibile ti ricontatteremo."
-        );
-      } else {
+      if (!res.ok) {
         setSubmitMsg(null);
         throw new Error("notify failed");
       }
@@ -444,7 +440,7 @@ export default function CoffeeCoreSite() {
                       headers: { "Content-Type": "application/json" },
                       body: JSON.stringify({ 
                         product: clickedProduct.id,
-                        email,
+                        email: email,
                         name: "-",
                         phone: "-",
                         company: "-",
