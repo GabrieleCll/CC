@@ -79,11 +79,9 @@ export default function EnhancedCapsulesPage() {
 
                   (e.currentTarget as HTMLFormElement).reset();
 
-                  alert(
-                    !onlyInfo
-                    ? "Grazie! Abbiamo registrato il pre-ordine; ti avviseremo non appena il prodotto sarà disponibile."
-                    : "Grazie! Ti avviseremo non appena il prodotto sarà disponibile."
-                  );
+                  if (onlyInfo) alert("Grazie! Ti avviseremo non appena il prodotto sarà disponibile.");
+                  else alert("Grazie! Abbiamo registrato il pre-ordine; ti avviseremo non appena il prodotto sarà disponibile.");
+                  
                 } catch {
                 }
               }}
@@ -118,7 +116,6 @@ export default function EnhancedCapsulesPage() {
                         name="intent"
                         value="notify"
                         className="px-5 py-3 rounded-2xl bg-white text-[#3B7080] border border-[#3B7080]/20 font-medium shadow"
-                  onClick={() => alert('Grazie! Ti avviseremo al lancio.')}
                 >
                   Avvisami al lancio
                 </button>
