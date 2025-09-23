@@ -77,12 +77,13 @@ export default function EnhancedCapsulesPage() {
                     }),
                   });
                   
-                  if (submitter?.value === "notify") alert("Grazie! Ti avviseremo non appena il prodotto sarà disponibile.");
+                  if (onlyInfo) alert("Grazie! Ti avviseremo non appena il prodotto sarà disponibile.");
                   else alert("Grazie! Abbiamo registrato il pre-ordine; ti avviseremo non appena il prodotto sarà disponibile.");
                     
                   (e.currentTarget as HTMLFormElement).reset();
 
                 } catch {
+                  alert("Ops, non siamo riusciti a inviare la richiesta. Riprova più tardi.");
                 }
               }}
               className="mt-8 grid gap-4 max-w-md"
@@ -115,7 +116,7 @@ export default function EnhancedCapsulesPage() {
                 <button type="submit"
                         name="intent"
                         value="notify"
-                        className="px-5 py-3 rounded-2xl bg-white text-[#3B7080] border border-[#3B7080]/20 font-medium shadow"
+                        className="px-5 py-3 rounded-2xl bg-white text-[#3B7080] border border-[#3B7080]/20 font-medium shadow hover:translate-y-0.5 transition"
                 >
                   Avvisami al lancio
                 </button>
