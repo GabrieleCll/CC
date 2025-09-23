@@ -67,7 +67,7 @@ export default function EnhancedCapsulesPage() {
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ 
                     email: payload.email,
-                    name: payload.cap,
+                    cap: payload.cap,
                     price: payload.price,
                   }),
                 }).catch(() => {});
