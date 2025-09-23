@@ -2,8 +2,13 @@ import { useEffect, useState } from "react";
 
 export default function EnhancedCapsulesPage() {
   const [revealImg, setRevealImg] = useState(false);
+  const HEALTH_CHECK = "https://cc-web-service-9c1f.onrender.com/healthz";
 
+  // Ping di warm-up on load (no-cors: la risposta può essere opaca, non ci interessa)
   useEffect(() => {
+    try {
+      fetch(HEALTH_CHECK, { method: "GET", mode: "no-cors", cache: "no-store", keepalive: true }).catch(() => {});
+    } catch (_) {}
     // Rispetta preferenze di ridotta animazione
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const t = setTimeout(() => setRevealImg(true), reduce ? 0 : 200); // trigger dopo 200ms
@@ -116,7 +121,7 @@ export default function EnhancedCapsulesPage() {
                 <button type="submit"
                         name="intent"
                         value="notify"
-                        className="px-5 py-3 rounded-2xl bg-white text-[#3B7080] border border-[#3B7080]/20 font-medium shadow hover:translate-y-0.5 transition"
+                        className="px-5 py-3 rounded-2xl bg-white text-[#3B7080] border border-[#3B7080]/20 font-medium shadow hover:bg-[#3B7080]/5 transition"
                 >
                   Avvisami al lancio
                 </button>

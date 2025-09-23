@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Package, Cog, FlaskConical, BottleWine } from "lucide-react";
 
 import PrivacyPage from "./PrivacyPage";
@@ -34,6 +34,14 @@ export default function CoffeeCoreSite() {
 
   // Endpoint email-service su Render (sostituisci con il tuo URL)
   const EMAIL_ENDPOINT = "https://cc-web-service-9c1f.onrender.com/api/notify";
+  const HEALTH_CHECK = "https://cc-web-service-9c1f.onrender.com/healthz";
+
+  // Ping di warm-up on load (no-cors: la risposta può essere opaca, non ci interessa)
+  useEffect(() => {
+  try {
+    fetch(HEALTH_CHECK, { method: "GET", mode: "no-cors", cache: "no-store", keepalive: true }).catch(() => {});
+  } catch (_) {}
+  }, []);
 
   type Product = {
     id: string;
