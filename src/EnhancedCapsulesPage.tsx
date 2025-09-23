@@ -57,7 +57,7 @@ export default function EnhancedCapsulesPage() {
 
             {/* Prezzo + CTA (smoke test) */}
             <form
-              onSubmit={async (e) => {
+              onSubmit={(e) => {
                 e.preventDefault();
                 // ✓ capisco quale bottone ha inviato il form
                 const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
@@ -66,7 +66,7 @@ export default function EnhancedCapsulesPage() {
                 const fd = new FormData(e.currentTarget as HTMLFormElement);
                 const payload = Object.fromEntries(fd.entries());
                 try {
-                  await fetch("https://cc-web-service-9c1f.onrender.com/api/pre-order", {
+                  fetch("https://cc-web-service-9c1f.onrender.com/api/pre-order", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ 
