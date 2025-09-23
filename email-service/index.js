@@ -63,7 +63,7 @@ app.post("/api/pre-order", async (req, res) => {
     const { email, cap, price } = req.body || {};
 
     // Validazioni basilari
-    if (!email || !message) {
+    if (!email) {
       return res.status(400).json({ ok: false, error: "email and message are required" });
     }
 
