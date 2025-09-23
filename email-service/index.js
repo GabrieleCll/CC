@@ -67,7 +67,7 @@ app.post("/api/pre-order", async (req, res) => {
       return res.status(400).json({ ok: false, error: "email and message are required" });
     }
 
-    const subject = `Pre-ordine – Coffee Core`;
+    const subject = `${onlyInfo ? "Info about" : "Pre-order"} Enhanced Coffee – Coffee Core`;
 
     const text =
 `${onlyInfo ? "Info about" : "Pre-order"} Enhanced Coffee

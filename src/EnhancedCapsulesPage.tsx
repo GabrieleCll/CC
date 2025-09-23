@@ -66,7 +66,7 @@ export default function EnhancedCapsulesPage() {
                 const fd = new FormData(e.currentTarget as HTMLFormElement);
                 const payload = Object.fromEntries(fd.entries());
                 try {
-                  const res = await fetch("https://cc-web-service-9c1f.onrender.com/api/pre-order", {
+                  await fetch("https://cc-web-service-9c1f.onrender.com/api/pre-order", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ 
@@ -76,8 +76,6 @@ export default function EnhancedCapsulesPage() {
                       onlyInfo: onlyInfo
                     }),
                   });
-
-                  if (!res.ok) throw new Error(String(res.status));
 
                   (e.currentTarget as HTMLFormElement).reset();
 
