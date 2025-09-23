@@ -60,7 +60,7 @@ Timestamp: ${new Date().toISOString()}
 
 app.post("/api/pre-order", async (req, res) => {
   try {
-    const { email, cap, price } = req.body || {};
+    const { email, cap, price, onlyInfo } = req.body || {};
 
     // Validazioni basilari
     if (!email) {
@@ -70,7 +70,7 @@ app.post("/api/pre-order", async (req, res) => {
     const subject = `Pre-ordine – Coffee Core`;
 
     const text =
-`Pre-order Enhanced Coffee
+`${onlyInfo ? "Info about" : "Pre-order"} Enhanced Coffee
 
 Email: ${email}
 CAP: ${cap || "-"}

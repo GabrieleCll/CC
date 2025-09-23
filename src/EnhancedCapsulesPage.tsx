@@ -57,22 +57,38 @@ export default function EnhancedCapsulesPage() {
 
             {/* Prezzo + CTA (smoke test) */}
             <form
-              onSubmit={(e) => {
+              onSubmit={async (e) => {
                 e.preventDefault();
+                // ✓ capisco quale bottone ha inviato il form
+                const submitter = (e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+                const onlyInfo = submitter?.value === "notify" ? true : false;
+
                 const fd = new FormData(e.currentTarget as HTMLFormElement);
                 const payload = Object.fromEntries(fd.entries());
-                // esempio: invio verso un endpoint backend o a un servizio di logging
-                fetch("https://cc-web-service-9c1f.onrender.com/api/pre-order", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ 
-                    email: payload.email,
-                    cap: payload.cap,
-                    price: payload.price,
-                  }),
-                }).catch(() => {});
-                (e.currentTarget as HTMLFormElement).reset();
-                alert("Grazie! Ti avviseremo al lancio / abbiamo registrato il pre-ordine.");
+                try {
+                  const res = await fetch("https://cc-web-service-9c1f.onrender.com/api/pre-order", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                      email: payload.email,
+                      cap: payload.cap,
+                      price: payload.price,
+                      onlyInfo: onlyInfo
+                    }),
+                  });
+
+                  if (!res.ok) throw new Error(String(res.status));
+
+                  (e.currentTarget as HTMLFormElement).reset();
+
+                  alert(
+                    !onlyInfo
+                    ? "Grazie! Abbiamo registrato il pre-ordine; ti avviseremo non appena il prodotto sarà disponibile."
+                    : "Grazie! Ti avviseremo non appena il prodotto sarà disponibile."
+                  );
+                } catch {
+                  alert("Ops, non siamo riusciti a inviare la richiesta. Riprova più tardi.");
+                }
               }}
               className="mt-8 grid gap-4 max-w-md"
             >
@@ -95,10 +111,16 @@ export default function EnhancedCapsulesPage() {
               </label>
 
               <div className="flex gap-3">
-                <button type="submit" className="px-5 py-3 rounded-2xl bg-[#57992D] text-white font-medium shadow hover:translate-y-0.5 transition">
+                <button type="submit"
+                        name="intent"
+                        value="preorder"
+                        className="px-5 py-3 rounded-2xl bg-[#57992D] text-white font-medium shadow hover:translate-y-0.5 transition">
                   Pre-ordina ora
                 </button>
-                <button type="button" className="px-5 py-3 rounded-2xl bg-white text-[#3B7080] border border-[#3B7080]/20 font-medium shadow"
+                <button type="submit"
+                        name="intent"
+                        value="notify"
+                        className="px-5 py-3 rounded-2xl bg-white text-[#3B7080] border border-[#3B7080]/20 font-medium shadow"
                   onClick={() => alert('Grazie! Ti avviseremo al lancio.')}
                 >
                   Avvisami al lancio
