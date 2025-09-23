@@ -66,7 +66,6 @@ export default function EnhancedCapsulesPage() {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ 
-                    product: "contact",
                     email: payload.email,
                     name: payload.cap,
                     price: payload.price,
