@@ -85,7 +85,6 @@ export default function EnhancedCapsulesPage() {
                     : "Grazie! Ti avviseremo non appena il prodotto sarà disponibile."
                   );
                 } catch {
-                  alert("Ops, non siamo riusciti a inviare la richiesta. Riprova più tardi.");
                 }
               }}
               className="mt-8 grid gap-4 max-w-md"
