@@ -58,6 +58,42 @@ Timestamp: ${new Date().toISOString()}
   }
 });
 
+app.post("/api/pre-order", async (req, res) => {
+  try {
+    const { email, cap, price } = req.body || {};
+
+    // Validazioni basilari
+    if (!email || !message) {
+      return res.status(400).json({ ok: false, error: "email and message are required" });
+    }
+
+    const subject = `Pre-ordine – Coffee Core`;
+
+    const text =
+`Pre-order Enhanced Coffee
+
+Email: ${email}
+CAP: ${cap || "-"}
+Price: ${price}
+
+Timestamp: ${new Date().toISOString()}
+`;
+
+    await sgMail.send({
+      to: process.env.TO_EMAIL,                // es. info@coffeecore.it
+      from: process.env.FROM_EMAIL,            // deve essere verificata su SendGrid
+      replyTo: email,
+      subject,
+      text
+    });
+
+    res.status(200).json({ ok: true });
+  } catch (err) {
+    console.error("Send error:", err?.response?.body || err);
+    res.status(500).json({ ok: false, error: "send_failed" });
+  }
+});
+
 // Porta fornita da Render
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Email service listening on :${port}`));
