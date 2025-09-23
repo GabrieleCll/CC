@@ -65,7 +65,12 @@ export default function EnhancedCapsulesPage() {
                 fetch("https://cc-web-service-9c1f.onrender.com/api/pre-order", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ product: "enhanced-capsules", ...payload, ts: new Date().toISOString() }),
+                  body: JSON.stringify({ 
+                  product: "contact",
+                  email: payload.email,
+                  name: payload.cap,
+                  phone: payload.price,
+                  }),
                 }).catch(() => {});
                 (e.currentTarget as HTMLFormElement).reset();
                 alert("Grazie! Ti avviseremo al lancio / abbiamo registrato il pre-ordine.");
