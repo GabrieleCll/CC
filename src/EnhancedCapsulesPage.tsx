@@ -76,12 +76,12 @@ export default function EnhancedCapsulesPage() {
                       onlyInfo: onlyInfo
                     }),
                   });
-
+                  
+                  if (submitter?.value === "notify") alert("Grazie! Ti avviseremo non appena il prodotto sarà disponibile.");
+                  else alert("Grazie! Abbiamo registrato il pre-ordine; ti avviseremo non appena il prodotto sarà disponibile.");
+                    
                   (e.currentTarget as HTMLFormElement).reset();
 
-                  if (onlyInfo) alert("Grazie! Ti avviseremo non appena il prodotto sarà disponibile.");
-                  else alert("Grazie! Abbiamo registrato il pre-ordine; ti avviseremo non appena il prodotto sarà disponibile.");
-                  
                 } catch {
                 }
               }}
