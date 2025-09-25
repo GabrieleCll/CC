@@ -128,7 +128,7 @@ export default function CoffeeCoreSite() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           product: p.id,
-          email: "gabrieleciullo95@gmail.com",
+          email: "-",
           name: "-",
           phone: "-",
           company: "-",
@@ -394,7 +394,7 @@ export default function CoffeeCoreSite() {
               </div> 
               </li>
               <li>P.IVA: 02792950699</li>
-              <li>Email: gabrieleciullo95@gmail.com</li>
+              <li>Email: info@coffeecore.it</li>
               <li>Sede: Via Primo Mazzolari SNC, 66100 Chieti (presso il Parco Scientifico e Tecnologico d'Abruzzo)</li>
             </ul>
           </aside>
@@ -466,7 +466,7 @@ export default function CoffeeCoreSite() {
                     // show mailto fallback
                     const subject = encodeURIComponent(`Interesse: ${clickedProduct.name}`);
                     const body = encodeURIComponent("Vorrei saperne di più su questo prodotto quando sarà pronto.");
-                    window.location.href = `mailto:gabrieleciullo95@gmail.com?subject=${subject}&body=${body}`;
+                    window.location.href = `mailto:info@coffeecore.it?subject=${subject}&body=${body}`;
                   } finally {
                     setSubmitting(false);
                   }
