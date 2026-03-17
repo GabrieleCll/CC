@@ -3,6 +3,7 @@ import { Package, Cog, FlaskConical, BottleWine } from "lucide-react";
 
 import PrivacyPage from "./PrivacyPage";
 import EnhancedCapsulesPage from "./EnhancedCapsulesPage";
+import CosmprofSurvey from "./cosmoprof_survey_gsheet";
 
 
 /**
@@ -26,6 +27,7 @@ export default function CoffeeCoreSite() {
   const path = typeof window !== 'undefined' ? window.location.pathname : '/';
   if (path === '/privacy') return <PrivacyPage />;
   if (path === '/bevande') return <EnhancedCapsulesPage />;
+  if (path === '/survey-cosmoprof') return <CosmprofSurvey />;
 
   const [open, setOpen] = useState(false);
   const [clickedProduct, setClickedProduct] = useState(null as null | Product);
