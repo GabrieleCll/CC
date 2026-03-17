@@ -3,7 +3,7 @@ import { Package, Cog, FlaskConical, BottleWine } from "lucide-react";
 
 import PrivacyPage from "./PrivacyPage";
 import EnhancedCapsulesPage from "./EnhancedCapsulesPage";
-import CosmprofSurvey from "./cosmoprof_survey_gsheet";
+import CosmprofSurvey from "./cosmoprof_survey_gsheet.jsx";
 
 
 /**
