@@ -1,490 +1,410 @@
-import { useMemo, useState, useEffect } from "react";
-import { Package, Cog, FlaskConical, BottleWine } from "lucide-react";
+import { useEffect } from "react";
+import {
+  ArrowRight,
+  Atom,
+  Building2,
+  Droplets,
+  Factory,
+  Flame,
+  FlaskConical,
+  Leaf,
+  Recycle,
+  ShieldCheck,
+  Sparkles,
+  Sun,
+  Cloud,
+} from "lucide-react";
+import SiteHeader from "./components/SiteHeader";
+import SiteFooter from "./components/SiteFooter";
+import { products } from "./products";
+import { sendNotify, warmUpApi } from "./api";
 
-import PrivacyPage from "./PrivacyPage";
-import EnhancedCapsulesPage from "./EnhancedCapsulesPage";
-import CosmprofSurvey from "./cosmoprof_survey_gsheet.jsx";
+const impactStats = [
+  { icon: Droplets, value: "130", unit: "litri d'acqua", note: "per ogni tazzina" },
+  { icon: Cloud, value: "280", unit: "g di CO₂", note: "per ogni tazzina" },
+  { icon: Flame, value: "16M", unit: "m³ di metano", note: "anno / bar italiani" },
+];
 
+const actives = [
+  { icon: ShieldCheck, title: "Polifenoli", text: "Antiossidanti concentrati" },
+  { icon: Sparkles, title: "Melanoidine", text: "Effetto anti-age" },
+  { icon: Sun, title: "UV protection", text: "Filtro naturale" },
+];
 
-/**
- * Coffee Core — Single Page Website (Single React Component)
- * ---------------------------------------------------------
- * - TailwindCSS utility classes for styling
- * - Montserrat font imported via <style> tag
- * - Color palette inspired by the two images the user provided
- * - "Fake door" CTA on products: opens a modal and sends a POST to `/api/notify`
- *   so you can wire a serverless function (e.g., Netlify / Vercel) to email the admin
- * - If the POST fails, we gracefully fallback to a `mailto:` link for manual reporting
- *
- * How to wire the email notification (example):
- *   1) Create an endpoint at `/api/notify` that accepts `{ product, email, ts }`.
- *   2) In that function, send an email to your admin (e.g., with SendGrid, SES, Mailgun).
- *   3) Return { ok: true } on success.
- */
+const steps = [
+  { img: "/img/step-raccolta.webp", title: "Raccolta", text: "Fondi di caffè post-espresso da bar e torrefazioni, con logistica tracciata." },
+  { img: "/img/step-estrazione.webp", title: "Estrazione", text: "Processo brevettato, mild e solvent free, a basso impatto energetico." },
+  { img: "/img/step-formulazione.webp", title: "Formulazione", text: "Estratto secco standardizzato, olio e pellet: ogni frazione trova valore." },
+];
+
+const markets = [
+  {
+    icon: Sparkles,
+    title: "Brand cosmetici",
+    text: "Aziende vegan-friendly e green-oriented che cercano formule ricche di antiossidanti con claim di sostenibilità certificata.",
+  },
+  {
+    icon: Leaf,
+    title: "Nutraceutica",
+    text: "Estratti ricchi di polifenoli per integratori e functional food, con tracciabilità completa della materia prima.",
+  },
+  {
+    icon: Factory,
+    title: "Torrefattori & raccolta",
+    text: "Partnership con torrefattori e piattaforme di raccolta: riduci i costi di smaltimento e apri a uno storytelling green.",
+  },
+];
+
+const institutions = [
+  { src: "/img/logo-sapienza.webp", alt: "Sapienza Università di Roma" },
+  { src: "/img/logo-pstda.webp", alt: "Parco Scientifico e Tecnologico d'Abruzzo" },
+  { src: "/img/logo-unimi.webp", alt: "Università degli Studi di Milano" },
+];
+
+const inputClass = "px-4 py-3 rounded-xl bg-white border border-cc-brown/15 focus:outline-none focus:border-cc-green";
 
 export default function CoffeeCoreSite() {
-  // Router minimale: se path è /privacy mostra la pagina Privacy, se path è /bevande mostra la pagina EnhancedCapsules, altrimenti la homepage
-  const path = typeof window !== 'undefined' ? window.location.pathname : '/';
-  if (path === '/privacy') return <PrivacyPage />;
-  if (path === '/bevande') return <EnhancedCapsulesPage />;
-  if (path === '/survey-cosmoprof') return <CosmprofSurvey />;
-
-  const [open, setOpen] = useState(false);
-  const [clickedProduct, setClickedProduct] = useState(null as null | Product);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitMsg, setSubmitMsg] = useState<string | null>(null);
-
-  // Endpoint email-service su Render (sostituisci con il tuo URL)
-  const EMAIL_ENDPOINT = "https://cc-web-service-9c1f.onrender.com/api/notify";
-  const HEALTH_CHECK = "https://cc-web-service-9c1f.onrender.com/healthz";
-
-  // Ping di warm-up on load (no-cors: la risposta può essere opaca, non ci interessa)
   useEffect(() => {
-  try {
-    fetch(HEALTH_CHECK, { method: "GET", mode: "no-cors", cache: "no-store", keepalive: true }).catch(() => {});
-  } catch (_) {}
+    warmUpApi();
   }, []);
-
-  type Product = {
-    id: string;
-    name: string;
-    status: "presente" | "futuro";
-    summary: string;
-    tag: string;
-    color: string; // tailwind bg-*
-  };
-
-  const palette = {
-    darkBrown: "#684330",
-    leafGreen: "#57992D",
-    cream: "#FBEFD9",
-    terracotta: "#DE7C5A",
-    teal: "#3B7080",
-    sage: "#B3D69B",
-    forest: "#455D51",
-    straw: "#D8C27A",
-    plum: "#5F464B",
-    brick: "#8E4A49",
-  } as const;
-
-  const products = useMemo<Product[]>(
-    () => [
-      {
-        id: "antiossidanti",
-        name: "Antiossidanti & Bioattivi (upcycled)",
-        status: "presente",
-        summary:
-          "Estratti ad alto valore da scarti di caffè per nutraceutica, food & beverage e cosmetica.",
-        tag: "Core",
-        color: "bg-[#57992D]",
-      },
-      {
-        id: "pellet",
-        name: "Pellet da scarti di caffè",
-        status: "futuro",
-        summary:
-          "Combustibile sostenibile e tracciabile ottenuto dal residuo di lavorazione.",
-        tag: "R&D",
-        color: "bg-[#8E4A49]",
-      },
-      {
-        id: "bevande",
-        name: "Bevande con bioattivi aggiunti",
-        status: "futuro",
-        summary:
-          "Linea di drink funzionali con antiossidanti naturali estratti dal caffè.",
-        tag: "R&D",
-        color: "bg-[#3B7080]",
-      },
-      {
-        id: "oli-cosmesi",
-        name: "Oli per la cosmesi",
-        status: "futuro",
-        summary:
-          "Oli e lipidi da fondi di caffè per skincare e haircare con ingredienti circolari.",
-        tag: "R&D",
-        color: "bg-[#D8C27A]",
-      },
-    ],
-    []
-  );
 
   const jumpAndHighlight = (id: string) => {
     const el = document.getElementById(id);
     if (!el) return;
     el.scrollIntoView({ behavior: "smooth", block: "start" });
-    // aggiunge un'animazione di evidenziazione temporanea
     el.classList.add("cc-highlight");
     window.setTimeout(() => el.classList.remove("cc-highlight"), 650);
-    };
-
-  const handleFakeDoor = async (p: Product) => {
-    setClickedProduct(p);
-    setOpen(true);
-    setSubmitting(true);
-    setSubmitMsg(null);
-
-    try {
-      const res = await fetch(EMAIL_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          product: p.id,
-          email: "-",
-          name: "-",
-          phone: "-",
-          company: "-",
-          message: "Ho aperto il prodotto"
-        }),
-      });
-      if (!res.ok) {
-        setSubmitMsg(null);
-        throw new Error("notify failed");
-      }
-    } catch (e) {
-      // Fallback: proponi mailto
-      setSubmitMsg(null);
-    } finally {
-      setSubmitting(false);
-    }
   };
-  
-  return (
-    <main className="min-h-screen bg-[#FBEFD9]" style={{ fontFamily: "Montserrat, ui-sans-serif, system-ui" }}>
-      {/* Import Montserrat */}
-      <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap');
-      @keyframes ccPulse { 0%{box-shadow:0 0 0 0 rgba(87,153,45,0.4)} 70%{box-shadow:0 0 0 12px rgba(87,153,45,0)} 100%{box-shadow:0 0 0 0 rgba(87,153,45,0)} }
-      .cc-highlight{ border-radius:1rem; animation: ccPulse 1.2s ease-in-out 1; background: rgba(179,214,155,0.18); }
-      `}</style>
 
-      {/* NAVBAR */}
-      <header className="sticky top-0 z-30 backdrop-blur bg-white/60 border-b border-black/5">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-          <a href="/" className="flex items-center gap-3">
-            <img src="/logo.svg" alt="Coffee Core" className="h-8 w-8 rounded-2xl" />
-            <span className="text-xl font-bold tracking-tight text-[#684330]">Coffee Core</span>
-          </a>
-          <nav className="hidden sm:flex items-center gap-6 text-sm">
-            <a href="#mission" className="hover:underline">Missione</a>
-            <a href="#process" className="hover:underline">Processo</a>
-            <a href="#prodotti" className="hover:underline">Prodotti</a>
-            <a href="#contatti" className="hover:underline">Contatti</a>
-          </nav>
-        </div>
-      </header>
+  return (
+    <main className="min-h-screen bg-cc-cream">
+      <SiteHeader />
 
       {/* HERO */}
-      <section id="hero" className="relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 z-0 pointer-events-none" aria-hidden>
-          <svg className="w-[140%] h-[140%] -translate-x-12 -translate-y-8" viewBox="0 0 800 600" fill="none">
-            <circle cx="150" cy="150" r="120" fill={palette.leafGreen} />
-            <circle cx="350" cy="220" r="180" fill={palette.teal} />
-            <circle cx="700" cy="100" r="110" fill={palette.straw} />
-          </svg>
-        </div>
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28 z-10">
-          <div className="grid md:grid-cols-2 items-center gap-10">
-            <div>
-              <h1 className="text-4xl sm:text-6xl font-bold leading-tight text-[#455D51]">
-                Diamo una <span className="text-[#57992D]">seconda vita</span> al caffè
-              </h1>
-              <p className="mt-6 text-lg text-[#5F464B] max-w-prose">
-                Coffee Core è una <strong>green company</strong> che trasforma gli scarti di caffè in ingredienti funzionali:
-                <em> antiossidanti, bioattivi e oli</em>. L'upcycling è il nostro core business: dal rifiuto, valore reale.
-              </p>
-              <div className="mt-8 flex gap-4">
-                <a href="#prodotti" className="px-5 py-3 rounded-2xl bg-[#57992D] text-white font-medium shadow hover:translate-y-0.5 transition">
-                  Esplora i prodotti
-                </a>
-                <a href="#cta" className="px-5 py-3 rounded-2xl bg-white text-[#3B7080] border border-[#3B7080]/20 font-medium shadow-sm hover:bg-[#3B7080]/5 transition">
-                  Parliamo di partnership
-                </a>
-              </div>
+      <section id="hero" className="relative overflow-hidden bg-cc-espresso text-white">
+        <img src="/img/hero-beans.webp" alt="" className="absolute inset-0 h-full w-full object-cover opacity-60" />
+        <div className="absolute inset-0 bg-gradient-to-r from-cc-espresso via-cc-espresso/80 to-transparent" aria-hidden />
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24 sm:py-36">
+          <div className="max-w-2xl">
+            <p className="cc-eyebrow text-cc-sage">Upcycling · Zero waste · Made in Italy</p>
+            <h1 className="mt-5 text-5xl sm:text-7xl font-extrabold leading-[1.02] tracking-tight">
+              Diamo una seconda <span className="text-cc-sage">vita al caffè</span>
+            </h1>
+            <p className="mt-7 text-lg sm:text-xl leading-8 text-white/90">
+              Coffee Core è una <strong>società benefit</strong> che trasforma i fondi di caffè in ingredienti premium e
+              tracciabili per cosmesi, nutraceutica ed energia. Puntiamo allo <strong>zero waste</strong>: dal singolo fondo
+              ricaviamo estratto secco, olio e pellet, senza lasciare nulla in discarica.
+            </p>
+            <div className="mt-10 flex flex-wrap gap-4">
+              <a href="#prodotti" className="inline-flex items-center gap-2 px-7 py-4 rounded-full bg-cc-green text-white font-semibold shadow-lg hover:bg-cc-forest transition-colors">
+                Scopri i prodotti <ArrowRight className="h-5 w-5" />
+              </a>
+              <a href="#partner" className="px-7 py-4 rounded-full border border-white/40 text-white font-semibold hover:bg-white/10 transition-colors">
+                Diventa partner di filiera
+              </a>
             </div>
-            <aside className="rounded-3xl p-6 sm:p-8 bg-white/70 border border-black/5 shadow-xl">
-              <h3 className="text-xl font-semibold text-[#684330]">Impatto circolare</h3>
-              <ul className="mt-4 space-y-3 text-[#5F464B]">
-                <li>♻️ Upcycling degli scarti di caffè</li>
-                <li>🌿 Ingredienti naturali per nutraceutica e cosmetica</li>
-                <li>⚗️ Estrazioni a basso impatto energetico</li>
-                <li>📦 Filiera tracciabile e partnering con torrefazioni</li>
-              </ul>
-            </aside>
           </div>
         </div>
       </section>
 
-      {/* MISSION */}
-      <section id="mission" className="scroll-mt-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="md:col-span-2">
-            <h2 className="text-3xl font-bold text-[#455D51]">Missione</h2>
-            <p className="mt-4 text-[#5F464B] leading-7">
-              Ridurre gli sprechi alimentari valorizzando i sottoprodotti del caffè. Con tecnologie
-              di estrazione mirate, isoliamo <strong>antiossidanti</strong> e composti <strong>bioattivi</strong> per
-              applicazioni che spaziano dal food alla cosmetica, in un'ottica di <em>economia circolare</em>.
+      {/* CONTESTO */}
+      <section id="contesto" className="scroll-mt-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
+        <div className="grid lg:grid-cols-2 gap-14 items-center">
+          <div>
+            <p className="cc-eyebrow text-cc-brown/70">Il contesto</p>
+            <h2 className="mt-3 text-4xl sm:text-5xl font-extrabold leading-tight text-cc-brown">
+              Dal problema <br />
+              <span className="font-light italic">all'opportunità</span>
+            </h2>
+            <p className="mt-6 text-lg leading-8">
+              Ogni tazzina di caffè cela un costo nascosto per il Pianeta: <strong>grandi quantità d'acqua</strong>,
+              emissioni di CO₂ e, soprattutto, tonnellate di fondi esausti che ogni anno finiscono in discarica,
+              rilasciando <strong>16 milioni di m³ di metano</strong>.
+            </p>
+            <p className="mt-5 border-l-4 border-cc-green bg-white/60 py-4 pl-5 pr-4 leading-7">
+              I consumatori premiano i marchi capaci di dimostrare <strong>sostenibilità lungo l'intera filiera</strong>.
+              La cosmetica è chiamata a sostituire materie prime ad alto impatto con{" "}
+              <strong>ingredienti tracciabili e circolari</strong>.
             </p>
           </div>
-          <div className="rounded-2xl p-6 bg-[#B3D69B] text-[#455D51] shadow">
-            <p className="font-medium">Numeri attesi</p>
-            <ul className="mt-2 space-y-1 text-sm">
-              <li>−60% rifiuti organici conferiti</li>
-              <li>+45% resa di estrazione target</li>
-              <li>0 solventi clorurati nei processi</li>
-            </ul>
+          <div className="grid grid-cols-3 gap-4">
+            {impactStats.map(({ icon: Icon, value, unit, note }) => (
+              <div key={unit} className="rounded-3xl bg-white p-5 sm:p-7 text-center shadow-sm border border-cc-brown/10">
+                <Icon className="mx-auto h-8 w-8 text-cc-terracotta" />
+                <p className="mt-4 text-3xl sm:text-5xl font-extrabold text-cc-brown">{value}</p>
+                <p className="mt-2 text-[0.65rem] sm:text-xs font-bold uppercase tracking-wide text-cc-brown">{unit}</p>
+                <p className="mt-1 text-xs">{note}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* PROCESS */}
-      <section id="process" className="scroll-mt-20 bg-white/70 border-y border-black/5">
-<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
-<h2 className="text-3xl font-bold text-[#455D51]">Dal fondo al valore</h2>
-<div className="mt-8 grid md:grid-cols-4 gap-6">
-<div className="rounded-2xl p-5 shadow border border-black/5 bg-[#D8C27A] flex flex-col items-start">
-<Package className="h-8 w-8 text-white mb-2" />
-<p className="text-lg font-semibold text-white drop-shadow-sm">Raccolta</p>
-<p className="mt-2 text-white/90 text-sm leading-6">Scarti da torrefazioni e bar, con logistica tracciata.</p>
-</div>
-<div className="rounded-2xl p-5 shadow border border-black/5 bg-[#57992D] opacity-75 flex flex-col items-start">
-<Cog className="h-8 w-8 text-white mb-2" />
-<p className="text-lg font-semibold text-white drop-shadow-sm">Pre-trattamento</p>
-<p className="mt-2 text-white/90 text-sm leading-6">Essiccazione e selezione per massima resa.</p>
-</div>
-<div className="rounded-2xl p-5 shadow border border-black/5 bg-[#57992D] flex flex-col items-start">
-<FlaskConical className="h-8 w-8 text-white mb-2" />
-<p className="text-lg font-semibold text-white drop-shadow-sm">Estrazione</p>
-<p className="mt-2 text-white/90 text-sm leading-6">Processi a basso impatto.</p>
-</div>
-<div className="rounded-2xl p-5 shadow border border-black/5 bg-[#455D51] flex flex-col items-start">
-<BottleWine className="h-8 w-8 text-white mb-2" />
-<p className="text-lg font-semibold text-white drop-shadow-sm">Formulazione</p>
-<p className="mt-2 text-white/90 text-sm leading-6">Ingredienti per diversi settori.</p>
-</div>
-</div>
-</div>
-</section>
-
-      {/* PRODUCTS */}
-      <section id="prodotti" className="scroll-mt-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-        <div className="flex items-end justify-between flex-wrap gap-4">
-          <div>
-            <h2 className="text-3xl font-bold text-[#455D51]">Prodotti</h2>
-            <p className="mt-2 text-[#5F464B]">Presenti e futuri: raccontiamo dove siamo e dove andiamo.</p>
-          </div>
-        </div>
-
-        <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-2 gap-6">
-          {products.map((p) => (
-            <article key={p.id} className={`rounded-3xl border border-black/5 shadow overflow-hidden ${p.color}`}>
-              <div className="p-6 h-full flex flex-col">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold text-white drop-shadow-sm">{p.name}</h3>
-                  {/* <span className={`text-xs px-2 py-1 rounded-full bg-white/30 text-white backdrop-blur`}>{p.status}</span> */}
+      {/* TECNOLOGIA */}
+      <section id="tecnologia" className="scroll-mt-20 bg-cc-teal text-white">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
+          <div className="grid lg:grid-cols-2 gap-14">
+            <div>
+              <p className="cc-eyebrow text-white/70">La nostra tecnologia</p>
+              <h2 className="mt-3 text-4xl sm:text-5xl font-extrabold leading-tight">
+                Dalla Natura, <br />
+                <span className="font-light italic">il principio attivo</span>
+              </h2>
+              <p className="mt-6 text-lg leading-8 text-white/90">
+                Estraiamo <strong className="text-white">polifenoli ad altissimo potere antiossidante</strong> direttamente dagli
+                scarti di caffè, non dal caffè verde, più costoso e in competizione con la filiera alimentare. Un processo
+                brevettato in condizioni mild preserva l'integrità dei principi attivi, garantendo concentrazioni record senza
+                solventi chimici aggressivi.
+              </p>
+            </div>
+            <div className="grid gap-5">
+              <div className="grid grid-cols-3 gap-4">
+                {actives.map(({ icon: Icon, title, text }) => (
+                  <div key={title} className="rounded-3xl bg-white/10 border border-white/20 p-5 text-center">
+                    <Icon className="mx-auto h-8 w-8 text-cc-sage" />
+                    <p className="mt-3 text-sm font-bold uppercase tracking-wide">{title}</p>
+                    <p className="mt-1 text-xs text-white/75">{text}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="rounded-3xl bg-white/10 border border-white/20 p-6">
+                  <p className="flex items-center gap-2 font-bold uppercase tracking-wide">
+                    <Recycle className="h-5 w-5 text-cc-sage" /> Zero waste
+                  </p>
+                  <p className="mt-3 text-white/85 leading-7">
+                    Il residuo solido diventa <strong className="text-white">pellet di biomassa</strong> per energia e calore,
+                    riducendo l'impronta ambientale.
+                  </p>
                 </div>
-                <p className="mt-3 text-white/90 leading-6 flex-1">{p.summary}</p>
-                <div className="mt-6 flex items-center justify-between">
-                  {/* <span className="text-xs uppercase tracking-wide text-white/70">{p.tag}</span> */}
-                  <button
-                    onClick={() => p.id === 'bevande' ? (window.location.href = '/bevande') : handleFakeDoor(p)}
-                    className="justify-self-start md:justify-self-end px-5 py-3 rounded-2xl bg-white text-[#455D51] font-medium shadow hover:translate-y-0.5 transition"
-                  >
-                    Scopri di più →
-                  </button>
+                <div className="rounded-3xl bg-white/10 border border-white/20 p-6">
+                  <p className="flex items-center gap-2 font-bold uppercase tracking-wide">
+                    <Leaf className="h-5 w-5 text-cc-sage" /> Solvent free
+                  </p>
+                  <p className="mt-3 text-white/85 leading-7">
+                    <strong className="text-white">Nessun solvente chimico</strong> nel processo: sicurezza e purezza garantite
+                    senza intaccare la qualità del prodotto.
+                  </p>
                 </div>
               </div>
-            </article>
+            </div>
+          </div>
+
+          <div className="mt-20 grid md:grid-cols-3 gap-6">
+            {steps.map((s, i) => (
+              <div key={s.title} className="rounded-3xl bg-cc-cream text-cc-plum overflow-hidden">
+                <img src={s.img} alt="" className="h-52 w-full object-cover" />
+                <div className="p-6">
+                  <p className="flex items-baseline gap-3 text-cc-brown">
+                    <span className="text-3xl font-extrabold text-cc-green">{i + 1}</span>
+                    <span className="text-xl font-bold">{s.title}</span>
+                  </p>
+                  <p className="mt-2 leading-7">{s.text}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* PRODOTTI */}
+      <section id="prodotti" className="scroll-mt-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
+        <div className="text-center max-w-3xl mx-auto">
+          <p className="cc-eyebrow text-cc-green">I nostri prodotti</p>
+          <h2 className="mt-3 text-4xl sm:text-5xl font-extrabold leading-tight text-cc-brown">
+            Tripla soluzione <span className="text-cc-green">zero waste</span>
+          </h2>
+          <p className="mt-5 text-lg leading-8">
+            Dallo stesso fondo di caffè nascono tre prodotti. Nessuna frazione viene scartata: ciò che non diventa
+            ingrediente cosmetico diventa energia.
+          </p>
+        </div>
+
+        <div className="mt-14 grid md:grid-cols-3 gap-8">
+          {products.map((p) => (
+            <a
+              key={p.id}
+              href={p.path}
+              className="group flex flex-col rounded-[2rem] bg-white overflow-hidden border border-cc-brown/10 shadow-sm hover:shadow-xl hover:-translate-y-1 transition"
+            >
+              <div className="relative aspect-[4/3] overflow-hidden">
+                <img src={p.image} alt={p.name} className="h-full w-full object-contain p-6 group-hover:scale-105 transition duration-500" />
+                <span className="absolute left-4 top-4 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide text-white" style={{ background: p.accent }}>
+                  {p.category}
+                </span>
+              </div>
+              <div className="flex flex-1 flex-col p-7">
+                <h3 className="text-2xl font-bold text-cc-brown">{p.name}</h3>
+                <p className="mt-2 leading-7 flex-1">{p.tagline}</p>
+                <span className="mt-6 inline-flex items-center gap-2 font-semibold" style={{ color: p.accent }}>
+                  Scopri e ordina <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition" />
+                </span>
+              </div>
+            </a>
           ))}
         </div>
       </section>
 
-      {/* CALL TO ACTION */}
-      <section id="cta" className="scroll-mt-20">
-  <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-    <div className="rounded-3xl overflow-hidden bg-[#455D51]">
-      <div className="grid md:grid-cols-2">
-        {/* Colonna IMMAGINE: occupa tutta la metà sinistra */}
-        <div className="relative min-h-[440px] md:min-h-[640px]">
-          <img
-            src="/partner.jpg"               // metti qui il tuo file (in /public)
-            alt="Partner di filiera"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        </div>
-
-        {/* Colonna TESTO: spaziosa */}
-        <div className="p-10 md:p-16 text-white flex flex-col justify-center">
-          <h3 className="text-3xl md:text-4xl font-bold">
-            Vuoi diventare partner di filiera?
-          </h3>
-          <p className="mt-4 text-white/85 text-lg leading-relaxed max-w-prose">
-            Cerchiamo torrefazioni, bar e brand che vogliono trasformare uno scarto in
-            opportunità concreta. Unisciti alla nostra rete e sviluppiamo insieme
-            prodotti upcycled ad alto valore aggiunto.
-          </p>
-          <div className="mt-8">
-            <button
-              onClick={() => jumpAndHighlight('contatti')}
-              className="px-5 py-3 rounded-2xl bg-white text-[#455D51] font-medium shadow hover:translate-y-0.5 transition"
-            >
-              Scrivici
-            </button>
+      {/* MERCATO */}
+      <section id="mercato" className="scroll-mt-20 bg-cc-sand">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28 grid lg:grid-cols-3 gap-10">
+          <div>
+            <p className="cc-eyebrow text-cc-brown/70">Il nostro mercato</p>
+            <h2 className="mt-3 text-4xl sm:text-5xl font-extrabold leading-tight text-cc-brown">A chi ci rivolgiamo</h2>
+          </div>
+          <div className="lg:col-span-2 grid sm:grid-cols-3 gap-5">
+            {markets.map(({ icon: Icon, title, text }) => (
+              <div key={title} className="rounded-3xl bg-white p-7 border-l-4 border-cc-straw shadow-sm">
+                <Icon className="h-7 w-7 text-cc-green" />
+                <h3 className="mt-4 text-lg font-bold text-cc-teal">{title}</h3>
+                <p className="mt-2 leading-7 text-sm">{text}</p>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-</section>
+      </section>
 
-      {/* CONTACTS */}
-      <section id="contatti" className="scroll-mt-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid md:grid-cols-3 gap-8">
+      {/* R&D */}
+      <section id="ricerca" className="scroll-mt-20 relative overflow-hidden bg-cc-night text-white">
+        <div className="absolute -right-32 -top-32 h-[28rem] w-[28rem] rounded-full bg-cc-green/25 blur-3xl" aria-hidden />
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28 grid lg:grid-cols-2 gap-14 items-center">
+          <div>
+            <p className="cc-eyebrow text-cc-sage">Ricerca & Sviluppo</p>
+            <h2 className="mt-3 text-4xl sm:text-5xl font-extrabold leading-tight">
+              La nostra R&D <span className="text-cc-sage">non si ferma mai</span>
+            </h2>
+            <p className="mt-6 text-lg leading-8 text-white/85">
+              Siamo sempre in esplorazione di nuovi modi per valorizzare al massimo i fondi di caffè. Insieme ai nostri
+              partner universitari studiamo ogni frazione della materia prima per trasformarla in qualcosa di utile.
+            </p>
+          </div>
+          <div className="rounded-[2rem] bg-white/5 border border-white/15 p-8 sm:p-10">
+            <div className="flex items-center gap-4">
+              <span className="grid h-14 w-14 place-items-center rounded-2xl bg-cc-green">
+                <Atom className="h-7 w-7" />
+              </span>
+              <p className="text-2xl font-bold">Verso il materiale grafenico</p>
+            </div>
+            <p className="mt-6 leading-8 text-white/85">
+              Le proprietà dei fondi di caffè, <strong className="text-white">ricchi di cellulosa e carbonio</strong>, li
+              rendono un candidato ideale per la produzione di <strong className="text-white">materiale grafenico</strong>:
+              una nuova frontiera che apre l'upcycling del caffè a elettronica, accumulo di energia e materiali avanzati.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3 text-sm">
+              {["Cellulosa", "Carbonio", "Materiali avanzati"].map((t) => (
+                <span key={t} className="rounded-full border border-white/25 px-4 py-1.5 text-white/85">{t}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* PARTNER DI FILIERA */}
+      <section id="partner" className="scroll-mt-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
+        <div className="rounded-[2.5rem] overflow-hidden bg-cc-forest">
+          <div className="grid md:grid-cols-2">
+            <div className="relative min-h-[360px] md:min-h-[560px]">
+              <img src="/partner.jpg" alt="Partner di filiera" className="absolute inset-0 w-full h-full object-cover" />
+            </div>
+            <div className="p-10 md:p-16 text-white flex flex-col justify-center">
+              <p className="cc-eyebrow text-cc-sage">Partner di filiera</p>
+              <h2 className="mt-3 text-3xl md:text-4xl font-extrabold leading-tight">Vuoi diventare partner di filiera?</h2>
+              <p className="mt-5 text-white/85 text-lg leading-8 max-w-prose">
+                Cerchiamo torrefazioni, bar e brand che vogliono trasformare uno scarto in opportunità concreta. Unisciti alla
+                nostra rete: riduci i costi di smaltimento e sviluppiamo insieme prodotti upcycled ad alto valore aggiunto.
+              </p>
+              <ul className="mt-6 space-y-2 text-white/85">
+                <li className="flex items-center gap-3"><Building2 className="h-5 w-5 text-cc-sage" /> Meno costi di smaltimento</li>
+                <li className="flex items-center gap-3"><Recycle className="h-5 w-5 text-cc-sage" /> Uno storytelling green concreto</li>
+                <li className="flex items-center gap-3"><FlaskConical className="h-5 w-5 text-cc-sage" /> Co-sviluppo di nuovi prodotti</li>
+              </ul>
+              <div className="mt-10">
+                <button
+                  onClick={() => jumpAndHighlight("contatti")}
+                  className="px-7 py-4 rounded-full bg-white text-cc-forest font-semibold shadow hover:bg-cc-cream transition-colors"
+                >
+                  Scrivici
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* PARTNER ISTITUZIONALI */}
+      <section className="border-y border-cc-brown/10 bg-white/50">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14">
+          <p className="cc-eyebrow text-center text-cc-brown">I nostri partner</p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-16 gap-y-8">
+            {institutions.map((i) => (
+              <img key={i.alt} src={i.src} alt={i.alt} className="h-14 sm:h-16 w-auto object-contain mix-blend-multiply" />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CONTATTI */}
+      <section id="contatti" className="scroll-mt-20 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 sm:py-28">
+        <div className="grid md:grid-cols-3 gap-10">
           <div className="md:col-span-2">
-            <h2 className="text-3xl font-bold text-[#455D51]">Contatti</h2>
-            <p className="mt-3 text-[#5F464B]">Parliamo del tuo caso d'uso o di una possibile collaborazione.</p>
+            <p className="cc-eyebrow text-cc-green">Contatti</p>
+            <h2 className="mt-3 text-4xl font-extrabold text-cc-brown">Parliamone</h2>
+            <p className="mt-3 text-lg">Raccontaci il tuo caso d'uso o una possibile collaborazione.</p>
 
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                const fd = new FormData(e.currentTarget as HTMLFormElement);
-                const payload = Object.fromEntries(fd.entries());
-                // tentativo invio opzionale a un endpoint
-                fetch(EMAIL_ENDPOINT, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
+                const form = e.currentTarget;
+                const payload = Object.fromEntries(new FormData(form).entries()) as Record<string, string>;
+                sendNotify({
                   product: "contact",
                   email: payload.email,
                   name: payload.name,
                   phone: payload.phone,
                   company: payload.company,
-                  message: payload.message 
-                  }),
+                  message: payload.message,
                 }).catch(() => {});
-                (e.currentTarget as HTMLFormElement).reset();
+                form.reset();
                 alert("Grazie! Ti ricontatteremo al più presto.");
               }}
-              className="mt-6 grid sm:grid-cols-2 gap-4"
+              className="mt-8 grid sm:grid-cols-2 gap-4"
             >
-              <input name="name" required placeholder="Nome e Cognome*" className="px-4 py-3 rounded-xl bg-white border border-black/10" />
-              <input name="email" required type="email" placeholder="Email*" className="px-4 py-3 rounded-xl bg-white border border-black/10" />
-              <input name="phone" placeholder="Telefono" className="px-4 py-3 rounded-xl bg-white border border-black/10" />
-              <input name="company" placeholder="Azienda" className="px-4 py-3 rounded-xl bg-white border border-black/10" />
-              <textarea name="message" required placeholder="Messaggio*" rows={5} className="sm:col-span-2 px-4 py-3 rounded-xl bg-white border border-black/10" />
+              <input name="name" required placeholder="Nome e Cognome*" className={inputClass} />
+              <input name="email" required type="email" placeholder="Email*" className={inputClass} />
+              <input name="phone" placeholder="Telefono" className={inputClass} />
+              <input name="company" placeholder="Azienda" className={inputClass} />
+              <textarea name="message" required placeholder="Messaggio*" rows={5} className={`sm:col-span-2 ${inputClass}`} />
 
-              {/* Flag privacy prima del pulsante invia */}
-              <label className="sm:col-span-2 flex items-start gap-3 text-sm text-[#5F464B]">
-              <input type="checkbox" name="privacyAccepted" required className="h-4 w-4" />
+              <label className="sm:col-span-2 flex items-start gap-3 text-sm">
+                <input type="checkbox" name="privacyAccepted" required className="mt-0.5 h-4 w-4" />
                 <span>
-                  Dichiaro di aver letto l' <a href="/privacy" className="underline" target="_blank" rel="noopener noreferrer">informativa privacy</a> e acconsento al trattamento dei dati per evadere la richiesta.
+                  Dichiaro di aver letto l'{" "}
+                  <a href="/privacy" className="underline" target="_blank" rel="noopener noreferrer">informativa privacy</a> e
+                  acconsento al trattamento dei dati per evadere la richiesta.
                 </span>
               </label>
 
-              <button className="sm:col-span-2 justify-self-start px-5 py-3 rounded-2xl bg-[#57992D] text-white font-medium shadow hover:translate-y-0.5 transition">
+              <button className="sm:col-span-2 justify-self-start px-7 py-4 rounded-full bg-cc-green text-white font-semibold shadow hover:bg-cc-forest transition-colors">
                 Invia
               </button>
             </form>
           </div>
-          <aside className="rounded-2xl p-6 bg-white border border-black/5 shadow">
-            <p className="font-semibold text-[#684330]">Dati aziendali</p>
-            <ul className="mt-3 text-sm text-[#5F464B] space-y-1">
+
+          <aside className="self-start rounded-3xl bg-cc-brown p-8 text-white">
+            <img src="/logo-light.svg" alt="" className="h-12 w-12" />
+            <p className="mt-4 text-xl font-bold">Coffee Core s.r.l. SB</p>
+            <ul className="mt-4 space-y-2 text-sm text-white/85">
+              <li>P.IVA 02792950699</li>
               <li>
-               <div className="display: flex">
-                <img src="/logo_brown.svg" alt="Coffee Core" className="h-4 w-4 mr-1" /> 
-                <strong>Coffee Core s.r.l. SB</strong>
-              </div> 
+                <a href="mailto:info@coffeecore.it" className="underline decoration-white/30 hover:decoration-white">info@coffeecore.it</a>
               </li>
-              <li>P.IVA: 02792950699</li>
-              <li>Email: info@coffeecore.it</li>
-              <li>Sede: Via Primo Mazzolari SNC, 66100 Chieti (presso il Parco Scientifico e Tecnologico d'Abruzzo)</li>
+              <li>Via Primo Mazzolari snc, 66100 Chieti, presso il Parco Scientifico e Tecnologico d'Abruzzo</li>
             </ul>
           </aside>
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-black/5">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 text-sm text-[#5F464B] flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p>© {new Date().getFullYear()} Coffee Core — Upcycled by design.</p>
-          <div className="flex gap-2">
-          <a href="https://www.linkedin.com/company/coffeecore" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-[#0A66C2] hover:underline">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
-              <path d="M19 0h-14c-2.76 0-5 2.24-5 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5v-14c0-2.76-2.24-5-5-5zm-11 19h-3v-9h3v9zm-1.5-10.29c-.97 0-1.75-.79-1.75-1.75s.78-1.75 1.75-1.75 1.75.79 1.75 1.75-.78 1.75-1.75 1.75zm13.5 10.29h-3v-4.73c0-1.13-.02-2.59-1.58-2.59-1.59 0-1.84 1.24-1.84 2.51v4.81h-3v-9h2.89v1.23h.04c.4-.76 1.37-1.56 2.83-1.56 3.03 0 3.59 2 3.59 4.59v4.74z"/>
-              </svg>
-              LinkedIn
-              </a>
-              <span>·</span>
-              <a href="/privacy" className="underline decoration-dotted">Privacy</a>
-            {/* <a href="#" className="underline decoration-dotted">Cookie</a> */}
-          </div>
-        </div>
-      </footer>
-
-      {/* MODAL: Fake Door */}
-      {open && clickedProduct && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 grid place-items-center p-4" role="dialog" aria-modal>
-          <div className="w-full max-w-lg rounded-3xl bg-white shadow-xl border border-black/5 p-6">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h3 className="text-2xl font-bold text-[#455D51]">{clickedProduct.name}</h3>
-                <p className="text-sm text-[#5F464B] mt-1">Prodotto in arrivo: grazie per l'interesse!</p>
-              </div>
-              <button onClick={() => setOpen(false)} className="p-2 rounded-xl bg-black/5 hover:bg-black/10">✕</button>
-            </div>
-
-            <div className="mt-5 space-y-4">
-              <p className="text-[#5F464B]">
-                Stiamo raccogliendo i clic per dare priorità allo sviluppo. Lascia la tua email se vuoi essere tra i primi a provarlo.
-              </p>
-              <form
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  const fd = new FormData(e.currentTarget as HTMLFormElement);
-                  const email = String(fd.get("email") || "");
-                  setSubmitting(true);
-                  setSubmitMsg(null);
-                  try {
-                    const res = await fetch(EMAIL_ENDPOINT, {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ 
-                        product: clickedProduct.id,
-                        email: email,
-                        name: "-",
-                        phone: "-",
-                        company: "-",
-                        message: "Vorrei saperne di più su questo prodotto quando sarà pronto."
-                      }),
-                    });
-                    if (res.ok) {
-                      setSubmitMsg("Perfetto! Ti avviseremo appena disponibile.");
-                    } else {
-                      setSubmitMsg(null);
-                      throw new Error("fail");
-                    }
-                  } catch (err) {
-                    setSubmitMsg(null);
-                    // show mailto fallback
-                    const subject = encodeURIComponent(`Interesse: ${clickedProduct.name}`);
-                    const body = encodeURIComponent("Vorrei saperne di più su questo prodotto quando sarà pronto.");
-                    window.location.href = `mailto:info@coffeecore.it?subject=${subject}&body=${body}`;
-                  } finally {
-                    setSubmitting(false);
-                  }
-                }}
-                className="flex flex-col sm:flex-row gap-3"
-              >
-                <input name="email" type="email" required placeholder="La tua email" className="flex-1 px-4 py-3 rounded-xl bg-[#FBEFD9] border border-black/10" />
-                <button disabled={submitting} className="px-5 py-3 rounded-2xl bg-[#57992D] text-white font-medium shadow disabled:opacity-60">
-                  {submitting ? "Invio…" : "Avvisami"}
-                </button>
-              </form>
-              {submitMsg && <p className="text-sm text-[#455D51]">{submitMsg}</p>}
-            </div>
-          </div>
-        </div>
-      )}
+      <SiteFooter />
     </main>
   );
 }
