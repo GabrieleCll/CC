@@ -39,6 +39,11 @@ html {
   100% { box-shadow: 0 0 0 0 rgba(87, 153, 45, 0); }
 }
 
+@keyframes ccKenBurns {
+  from { transform: scale(1.08); }
+  to { transform: scale(1); }
+}
+
 .cc-highlight {
   border-radius: 1rem;
   animation: ccPulse 1.2s ease-in-out 1;

@@ -1,6 +1,8 @@
-import { products } from "../products";
+import { useI18n } from "../i18n";
 
 export default function SiteFooter() {
+  const { t, products, href } = useI18n();
+
   return (
     <footer className="bg-cc-espresso text-white/80">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-14 grid gap-10 md:grid-cols-4">
@@ -10,30 +12,30 @@ export default function SiteFooter() {
             <span className="text-xl font-medium text-white">Coffee Core</span>
           </div>
           <p className="mt-4 max-w-sm text-sm leading-6">
-            Diamo una seconda vita al caffè: dal fondo esausto a ingredienti premium, tracciabili e a zero waste.
+            {t.footer.tagline}
           </p>
         </div>
 
         <div>
-          <p className="cc-eyebrow text-cc-sage">Prodotti</p>
+          <p className="cc-eyebrow text-cc-sage">{t.footer.products}</p>
           <ul className="mt-4 space-y-2 text-sm">
             {products.map((p) => (
               <li key={p.id}>
-                <a href={p.path} className="hover:text-white">{p.name}</a>
+                <a href={href(p.path)} className="hover:text-white">{p.name}</a>
               </li>
             ))}
           </ul>
         </div>
 
         <div>
-          <p className="cc-eyebrow text-cc-sage">Contatti</p>
+          <p className="cc-eyebrow text-cc-sage">{t.footer.contacts}</p>
           <ul className="mt-4 space-y-2 text-sm">
             <li>Coffee Core s.r.l. SB</li>
             <li>P.IVA 02792950699</li>
             <li>
               <a href="mailto:info@coffeecore.it" className="hover:text-white">info@coffeecore.it</a>
             </li>
-            <li>Via Primo Mazzolari snc, 66100 Chieti (CH)</li>
+            <li>{t.footer.address}</li>
           </ul>
         </div>
       </div>
@@ -53,7 +55,7 @@ export default function SiteFooter() {
               </svg>
               LinkedIn
             </a>
-            <a href="/privacy" className="underline decoration-dotted hover:text-white">Privacy</a>
+            <a href="/privacy" className="underline decoration-dotted hover:text-white">{t.footer.privacy}</a>
           </div>
         </div>
       </div>

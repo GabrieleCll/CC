@@ -2,24 +2,29 @@ import CoffeeCoreSite from "./CoffeeCoreSite";
 import PrivacyPage from "./PrivacyPage";
 import ProductPage from "./ProductPage";
 import CosmprofSurvey from "./cosmoprof_survey_gsheet.jsx";
-import { findProductByPath } from "./products";
+import { findProductIdByPath } from "./products";
+import { splitLocale } from "./i18n";
+import LocaleProvider from "./i18n/LocaleProvider";
 
 function App() {
-  const path = window.location.pathname.replace(/\/+$/, "") || "/";
+  const { locale, path } = splitLocale(window.location.pathname);
 
   if (path === "/privacy") return <PrivacyPage />;
   if (path === "/survey-cosmoprof") return <CosmprofSurvey />;
 
   // The "supercaffè" capsules were retired: send old links to the homepage.
   if (path === "/bevande") {
-    window.location.replace("/");
+    window.location.replace(locale === "en" ? "/en" : "/");
     return null;
   }
 
-  const product = findProductByPath(path);
-  if (product) return <ProductPage product={product} />;
+  const productId = findProductIdByPath(path);
 
-  return <CoffeeCoreSite />;
+  return (
+    <LocaleProvider locale={locale}>
+      {productId ? <ProductPage id={productId} /> : <CoffeeCoreSite />}
+    </LocaleProvider>
+  );
 }
 
 export default App;
