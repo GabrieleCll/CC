@@ -1,15 +1,55 @@
 @import "tailwindcss";
 
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;700&display=swap');
+@theme {
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  --color-cc-brown: #684330;
+  --color-cc-espresso: #4A3022;
+  --color-cc-green: #57992D;
+  --color-cc-cream: #FBEFD9;
+  --color-cc-sand: #F3E4C8;
+  --color-cc-terracotta: #DE7C5A;
+  --color-cc-teal: #3B7080;
+  --color-cc-sage: #B3D69B;
+  --color-cc-forest: #455D51;
+  --color-cc-night: #26382C;
+  --color-cc-straw: #D8C27A;
+  --color-cc-plum: #5F464B;
+}
 
-body { font-family: 'Montserrat', ui-sans-serif, system-ui; }
+body {
+  font-family: var(--font-sans);
+  background: var(--color-cc-cream);
+  color: var(--color-cc-plum);
+}
 
-/* Scroll fluido per tutti */
 html {
   scroll-behavior: smooth;
 }
 
-/* Rispetto accessibilità: se l’utente ha ridotto animazioni */
+.cc-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+@keyframes ccPulse {
+  0% { box-shadow: 0 0 0 0 rgba(87, 153, 45, 0.4); }
+  70% { box-shadow: 0 0 0 12px rgba(87, 153, 45, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(87, 153, 45, 0); }
+}
+
+@keyframes ccKenBurns {
+  from { transform: scale(1.08); }
+  to { transform: scale(1); }
+}
+
+.cc-highlight {
+  border-radius: 1rem;
+  animation: ccPulse 1.2s ease-in-out 1;
+  background: rgba(179, 214, 155, 0.18);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
